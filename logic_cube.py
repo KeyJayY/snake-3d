@@ -5,13 +5,14 @@ from pygame.locals import *
 from OpenGL.GL import *
 from OpenGL.GLU import *
 from config import *
-from utils import rot_x, rot_y, mat_mul
+from utils import rot_x, rot_y, mat_mul, clamp
 from graphics import (
     draw_cube_common,
     setup_lights,
     setup_point_light,
     draw_cube_face_background,
     draw_pulsating_apple,
+    draw_background,
 )
 
 
@@ -21,6 +22,17 @@ class CubeGame:
         self.N = 8
         self.CELL_SPAN = 2.0 / self.N
         self.SCALE = self.CELL_SPAN * 0.85
+
+        # Define camera keys BEFORE reset
+        self.cam_keys = {
+            "up": False,
+            "down": False,
+            "left": False,
+            "right": False,
+            "zoom_in": False,
+            "zoom_out": False,
+        }
+
         self.reset()
 
     def reset(self):
@@ -35,6 +47,9 @@ class CubeGame:
         self.cam_zoom = -5.5
         self.score = 0
 
+        for k in self.cam_keys:
+            self.cam_keys[k] = False
+
     def get_food(self):
         """Finds a random face and grid position for food, avoiding the snake."""
         while True:
@@ -46,20 +61,59 @@ class CubeGame:
             if pos not in self.snake:
                 return pos
 
-    def handle_camera_input(self, keys):
-        """Updates camera rotation and zoom based on keyboard input."""
-        if keys[K_w]:
+    def process_event(self, event):
+        """Handles input events for snake turning and camera control."""
+        if event.type == KEYDOWN:
+            # Snake
+            if event.key == K_LEFT:
+                self.next_turn = "LEFT"
+            elif event.key == K_RIGHT:
+                self.next_turn = "RIGHT"
+
+            # Camera Start
+            if event.key == K_w:
+                self.cam_keys["up"] = True
+            elif event.key == K_s:
+                self.cam_keys["down"] = True
+            elif event.key == K_a:
+                self.cam_keys["left"] = True
+            elif event.key == K_d:
+                self.cam_keys["right"] = True
+            elif event.key == K_q:
+                self.cam_keys["zoom_in"] = True
+            elif event.key == K_e:
+                self.cam_keys["zoom_out"] = True
+
+        elif event.type == KEYUP:
+            # Camera Stop
+            if event.key == K_w:
+                self.cam_keys["up"] = False
+            elif event.key == K_s:
+                self.cam_keys["down"] = False
+            elif event.key == K_a:
+                self.cam_keys["left"] = False
+            elif event.key == K_d:
+                self.cam_keys["right"] = False
+            elif event.key == K_q:
+                self.cam_keys["zoom_in"] = False
+            elif event.key == K_e:
+                self.cam_keys["zoom_out"] = False
+
+    def update_camera(self):
+        """Updates camera values based on active key flags."""
+        if self.cam_keys["up"]:
             self.cam_pitch += 1.5
-        if keys[K_s]:
+        if self.cam_keys["down"]:
             self.cam_pitch -= 1.5
-        if keys[K_a]:
+        if self.cam_keys["left"]:
             self.cam_yaw -= 1.5
-        if keys[K_d]:
+        if self.cam_keys["right"]:
             self.cam_yaw += 1.5
-        if keys[K_q]:
-            self.cam_zoom += 0.2
-        if keys[K_e]:
-            self.cam_zoom -= 0.2
+
+        if self.cam_keys["zoom_in"]:
+            self.cam_zoom = clamp(self.cam_zoom + 0.2, -15.0, -3.0)
+        if self.cam_keys["zoom_out"]:
+            self.cam_zoom = clamp(self.cam_zoom - 0.2, -15.0, -3.0)
 
     def local_to_world(self, f, x, y):
         """Converts face index and grid coordinates to 3D world coordinates."""
@@ -146,10 +200,15 @@ class CubeGame:
         snake_tex_id=None,
         floor_tex_id=None,
         apple_tex_id=None,
+        bg_tex_id=None,
         shader_program=None,
         time=0,
     ):
         """Renders the entire cube game scene including lights, cube faces, and objects."""
+
+        # Draw background first
+        draw_background(bg_tex_id)
+
         glMatrixMode(GL_PROJECTION)
         glLoadIdentity()
         gluPerspective(45, DISPLAY_SIZE[0] / DISPLAY_SIZE[1], 0.1, 100.0)

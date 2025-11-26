@@ -3,7 +3,7 @@ MOVE_DELAY = 140
 
 COLOR_BG = (0.05, 0.05, 0.1, 1)
 COLOR_GRID = (0.3, 0.3, 0.3)
-COLOR_BORDER = (0.0, 0.8, 1.0)
+COLOR_BORDER = (0.0, 0.3, 0.6)
 COLOR_FOOD = (1.0, 0.2, 0.2)
 COLOR_HEAD = (0.2, 1.0, 0.2)
 COLOR_BODY = (0.0, 0.7, 0.0)

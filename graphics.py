@@ -4,6 +4,80 @@ from OpenGL.GLU import *
 from config import *
 
 
+def draw_background(texture_id):
+    """Draws a static background image covering the entire screen behind 3D objects."""
+    if not texture_id:
+        return
+
+    glDisable(GL_DEPTH_TEST)
+    glDisable(GL_LIGHTING)
+    glEnable(GL_TEXTURE_2D)
+    glBindTexture(GL_TEXTURE_2D, texture_id)
+    glColor3f(1.0, 1.0, 1.0)
+
+    glMatrixMode(GL_PROJECTION)
+    glPushMatrix()
+    glLoadIdentity()
+    gluOrtho2D(0, DISPLAY_SIZE[0], 0, DISPLAY_SIZE[1])
+
+    glMatrixMode(GL_MODELVIEW)
+    glPushMatrix()
+    glLoadIdentity()
+
+    glBegin(GL_QUADS)
+    glTexCoord2f(0, 1)
+    glVertex2f(0, 0)
+    glTexCoord2f(1, 1)
+    glVertex2f(DISPLAY_SIZE[0], 0)
+    glTexCoord2f(1, 0)
+    glVertex2f(DISPLAY_SIZE[0], DISPLAY_SIZE[1])
+    glTexCoord2f(0, 0)
+    glVertex2f(0, DISPLAY_SIZE[1])
+    glEnd()
+
+    glPopMatrix()
+    glMatrixMode(GL_PROJECTION)
+    glPopMatrix()
+    glMatrixMode(GL_MODELVIEW)
+
+    glDisable(GL_TEXTURE_2D)
+    glEnable(GL_DEPTH_TEST)
+
+
+def draw_rect_2d(x, y, width, height, color):
+    """Draws a 2D colored rectangle (e.g. for UI backgrounds) over the scene."""
+    glDisable(GL_DEPTH_TEST)
+    glDisable(GL_LIGHTING)
+    glDisable(GL_TEXTURE_2D)
+    glEnable(GL_BLEND)
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
+
+    glMatrixMode(GL_PROJECTION)
+    glPushMatrix()
+    glLoadIdentity()
+    gluOrtho2D(0, DISPLAY_SIZE[0], 0, DISPLAY_SIZE[1])
+
+    glMatrixMode(GL_MODELVIEW)
+    glPushMatrix()
+    glLoadIdentity()
+
+    glColor4f(*color)
+    glBegin(GL_QUADS)
+    glVertex2f(x, y)
+    glVertex2f(x + width, y)
+    glVertex2f(x + width, y + height)
+    glVertex2f(x, y + height)
+    glEnd()
+
+    glPopMatrix()
+    glMatrixMode(GL_PROJECTION)
+    glPopMatrix()
+    glMatrixMode(GL_MODELVIEW)
+
+    glEnable(GL_DEPTH_TEST)
+    glDisable(GL_BLEND)
+
+
 def draw_cube_common(color, scale=0.85, emission_level=0.0, texture_id=None):
     """Draws a textured or colored cube with optional emission material settings."""
     glPushMatrix()
@@ -193,7 +267,7 @@ def setup_lights(pos):
     glEnable(GL_LIGHT0)
     glEnable(GL_COLOR_MATERIAL)
 
-    glLightModelfv(GL_LIGHT_MODEL_AMBIENT, (0.15, 0.15, 0.15, 1))
+    glLightModelfv(GL_LIGHT_MODEL_AMBIENT, (0.3, 0.3, 0.3, 1))
 
     glLightfv(GL_LIGHT0, GL_POSITION, pos)
     glLightfv(GL_LIGHT0, GL_DIFFUSE, (0.0, 0.0, 0.0, 1))

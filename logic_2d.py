@@ -11,6 +11,7 @@ from graphics import (
     setup_point_light,
     draw_planar_floor,
     draw_pulsating_apple,
+    draw_background,
 )
 
 
@@ -19,6 +20,17 @@ class PlanarGame:
         """Initializes the planar game mode state."""
         self.GRID_X = (-10, 10)
         self.GRID_Y = (-8, 8)
+
+        # Define camera keys BEFORE reset to avoid AttributeError
+        self.cam_keys = {
+            "up": False,
+            "down": False,
+            "left": False,
+            "right": False,
+            "zoom_in": False,
+            "zoom_out": False,
+        }
+
         self.reset()
 
     def reset(self):
@@ -32,6 +44,9 @@ class PlanarGame:
         self.cam_zoom = -30
         self.score = 0
 
+        for k in self.cam_keys:
+            self.cam_keys[k] = False
+
     def get_safe_food(self):
         """Finds a random grid position for food that is not occupied by the snake."""
         while True:
@@ -40,16 +55,59 @@ class PlanarGame:
             if (x, y) not in self.snake:
                 return (x, y)
 
-    def handle_camera_input(self, keys):
-        """Updates camera rotation angles based on keyboard input."""
-        if keys[K_w]:
+    def process_event(self, event):
+        """Handles input events for both snake control (discrete) and camera (continuous)."""
+        if event.type == KEYDOWN:
+            # Snake movement
+            if event.key == K_LEFT:
+                self.next_turn = "LEFT"
+            elif event.key == K_RIGHT:
+                self.next_turn = "RIGHT"
+
+            # Camera movement start
+            if event.key == K_w:
+                self.cam_keys["up"] = True
+            elif event.key == K_s:
+                self.cam_keys["down"] = True
+            elif event.key == K_a:
+                self.cam_keys["left"] = True
+            elif event.key == K_d:
+                self.cam_keys["right"] = True
+            elif event.key == K_q:
+                self.cam_keys["zoom_in"] = True
+            elif event.key == K_e:
+                self.cam_keys["zoom_out"] = True
+
+        elif event.type == KEYUP:
+            # Camera movement stop
+            if event.key == K_w:
+                self.cam_keys["up"] = False
+            elif event.key == K_s:
+                self.cam_keys["down"] = False
+            elif event.key == K_a:
+                self.cam_keys["left"] = False
+            elif event.key == K_d:
+                self.cam_keys["right"] = False
+            elif event.key == K_q:
+                self.cam_keys["zoom_in"] = False
+            elif event.key == K_e:
+                self.cam_keys["zoom_out"] = False
+
+    def update_camera(self):
+        """Updates camera rotation based on current key flags."""
+        if self.cam_keys["up"]:
             self.cam_pitch = clamp(self.cam_pitch + 1.5, -90, 90)
-        if keys[K_s]:
+        if self.cam_keys["down"]:
             self.cam_pitch = clamp(self.cam_pitch - 1.5, -90, 90)
-        if keys[K_a]:
+        if self.cam_keys["left"]:
             self.cam_yaw = clamp(self.cam_yaw - 1.5, -90, 90)
-        if keys[K_d]:
+        if self.cam_keys["right"]:
             self.cam_yaw = clamp(self.cam_yaw + 1.5, -90, 90)
+
+        if self.cam_keys["zoom_in"]:
+            self.cam_zoom = clamp(self.cam_zoom + 0.5, -50, -10)
+        if self.cam_keys["zoom_out"]:
+            self.cam_zoom = clamp(self.cam_zoom - 0.5, -50, -10)
 
     def update(self):
         """Updates game logic for one tick: moves snake, checks collisions."""
@@ -86,10 +144,15 @@ class PlanarGame:
         snake_tex_id=None,
         floor_tex_id=None,
         apple_tex_id=None,
+        bg_tex_id=None,
         shader_program=None,
         time=0,
     ):
         """Renders the entire planar game scene including lights, floor, and objects."""
+
+        # Draw background first (behind everything)
+        draw_background(bg_tex_id)
+
         glMatrixMode(GL_PROJECTION)
         glLoadIdentity()
         gluPerspective(45, DISPLAY_SIZE[0] / DISPLAY_SIZE[1], 0.1, 100.0)

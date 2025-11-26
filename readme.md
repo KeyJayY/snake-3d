@@ -29,9 +29,6 @@ This project demonstrates various computer graphics concepts:
 - Phong Lighting Model  
   The scene is lit by dynamic point lights attached to the snake's head and the apple, creating an immersive atmosphere.
 
-- Texture Mapping  
-  Full UV mapping support for the snake, environment (floor), and items.
-
 - Tessellated Geometry  
   The floor and cube faces are tessellated to ensure lighting calculations (Gouraud/Phong) look smooth even near the edges.
 

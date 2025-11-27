@@ -85,6 +85,10 @@ This project demonstrates various computer graphics concepts:
 - config.py  
   Configuration constants.
 
+## Used textures
+
+Textures are sourced from https://www.freepik.com
+
 ## Demo
 
 ### 2D Mode

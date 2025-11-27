@@ -13,10 +13,11 @@ Experience: Play on a flat surface with depth perception.
 Camera: Use the orbital camera to inspect the board from different angles while playing.  
 Visuals: Dynamic shadows and lighting that react to the snake's position.
 
-### 2. Cube Mode (The Challenge)
+### 2. Cube Mode
 This mode changes the rules of geometry. The snake moves on the surface of a rotating cube.
 
 The Challenge: The snake wraps around edges.
+
 Math: Implements complex topology transitions to map 2D grid logic onto a 3D manifold seamlessly.
 
 ## Technical Highlights
@@ -43,11 +44,11 @@ This project demonstrates various computer graphics concepts:
 1. Clone the repository or extract the source code.
 2. Install required dependencies (recommended to use a virtual environment):
 
-   pip install -r requirements.txt
+   `pip install -r requirements.txt`
 
 3. Run the game:
 
-   python main.py
+   `python main.py`
 
 ## Controls
 
@@ -85,3 +86,11 @@ This project demonstrates various computer graphics concepts:
   Configuration constants.
 
 ## Demo
+
+### 2D Mode
+![snake3d_1](https://github.com/user-attachments/assets/a1803cf7-04b1-4210-a316-a90d37b8c16d)
+
+### 3D Mode
+![sanke3d_2](https://github.com/user-attachments/assets/7c598df6-9e75-4b87-887b-8e9ebbc4f5ec)
+
+
